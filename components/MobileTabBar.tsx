@@ -19,7 +19,7 @@ export const MobileTabBar: React.FC = () => {
       action: () => navigate('/', { state: { scrollToBook: true } }) 
     },
     { 
-      path: 'tel:+918870088020', 
+      path: 'tel:+914223596446', 
       label: 'Call', 
       icon: Phone, 
       isExternal: true,
