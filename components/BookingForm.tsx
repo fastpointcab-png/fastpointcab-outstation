@@ -48,6 +48,36 @@ const HILL_STATION_ZONES = [
   { name: 'Chikmagalur', lat: 13.3161, lng: 75.7720, radius: 30 },
 ];
 
+const HILL_EXCLUSION_KEYWORDS = [
+  // Base towns near Nilgiris (MOST IMPORTANT)
+  'mettupalayam',
+  'karamadai',
+  'coimbatore',
+  'sirumugai',
+  'annur',
+  'periyanaickenpalayam',
+  'sathyamangalam',
+
+  // Entry/low altitude routes
+  'gobichettipalayam',
+  'tiruppur',
+  'pollachi',
+  'udumalaipettai',
+  'dharapuram',
+
+  // Kerala plains (avoid false hill triggers)
+  'palakkad',
+  'thrissur',
+  'ernakulam',
+  'cochin',
+  'alappuzha',
+
+  // Border buffer towns
+  'bhavani',
+  'salem city',
+  'erode city'
+];
+
 const calculateHaversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
   const R = 6371; // Earth's radius in km
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -62,15 +92,25 @@ const calculateHaversineDistance = (lat1: number, lon1: number, lat2: number, lo
 
 const checkIsHillStation = async (address: string): Promise<boolean> => {
   if (!address) return false;
-  
-  // 1. Keyword check (Fast)
-  const lower = address.toLowerCase();
-  if (HILL_STATIONS.some(hs => lower.includes(hs))) return true;
 
-  // 2. Coordinate check (Accurate fallback)
+  const lower = address.toLowerCase();
+
+  // ❌ 1. EXCLUSION CHECK FIRST (VERY IMPORTANT)
+  if (HILL_EXCLUSION_KEYWORDS.some(word => lower.includes(word))) {
+    return false;
+  }
+
+  // ✅ 2. FAST KEYWORD CHECK
+  if (HILL_STATIONS.some(hs => lower.includes(hs))) {
+    return true;
+  }
+
+  // 3. GEOCODING CHECK (ACCURATE)
   try {
     if (!(window as any).google?.maps?.Geocoder) return false;
+
     const geocoder = new (window as any).google.maps.Geocoder();
+
     const result = await new Promise<any[]>((resolve, reject) => {
       geocoder.geocode({ address }, (results: any, status: string) => {
         if (status === 'OK' && results) resolve(results);
