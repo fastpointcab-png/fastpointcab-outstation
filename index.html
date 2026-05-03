@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+<meta charset="UTF-8" />
+    <link rel="icon" type="/image/png" href="/images/trusty favicon.png" />
+
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+
+    <meta name="theme-color" content="#FF6467" />
+    <title>Coimbatore - Taxi Service</title>
+
+    <!-- Modern, clean font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            },
+            spacing: {
+              'safe-area-inset-bottom': 'env(safe-area-inset-bottom)',
+            },
+            colors: {
+              brand: {
+                yellow: '#FF6467',
+                dark: '#FF6467',
+                slate: '#FF6467',
+                cloud: '#FF6467',
+              },
+              yellow: {
+                400: '#FF6467',
+                500: '#FF6467',
+                600: '#FF6467',
+              }
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.5s ease-out',
+              'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'vertical-scroll': 'verticalScroll 60s linear infinite',
+              'vertical-scroll-reverse': 'verticalScrollReverse 60s linear infinite',
+              'magnetic-float': 'magneticFloat 6s ease-in-out infinite',
+              'radar-signal': 'radarSignal 3s cubic-bezier(0, 0, 0.2, 1) infinite',
+              'rhythmic-vibrate': 'rhythmicVibrate 2.5s ease-in-out infinite',
+              'glow-flow': 'glowFlow 4s ease-in-out infinite',
+              'ring-vibrate': 'ringVibrate 3s ease-in-out infinite',
+              'side-peek': 'sidePeek 4s ease-in-out infinite',
+              'shimmer-x': 'shimmerX 2s infinite',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              verticalScroll: {
+                '0%': { transform: 'translateY(0)' },
+                '100%': { transform: 'translateY(-50%)' },
+              },
+              verticalScrollReverse: {
+                '0%': { transform: 'translateY(-50%)' },
+                '100%': { transform: 'translateY(0)' },
+              },
+              magneticFloat: {
+                '0%, 100%': { transform: 'translate(0, 0) rotate(0deg)' },
+                '33%': { transform: 'translate(5px, -15px) rotate(2deg)' },
+                '66%': { transform: 'translate(-5px, -10px) rotate(-2deg)' },
+              },
+              radarSignal: {
+                '0%': { transform: 'scale(1)', opacity: '0.5' },
+                '100%': { transform: 'scale(2.5)', opacity: '0' },
+              },
+              rhythmicVibrate: {
+                '0%, 15%, 100%': { transform: 'rotate(0) scale(1)' },
+                '2%': { transform: 'rotate(-8deg) scale(1.1)' },
+                '4%': { transform: 'rotate(8deg) scale(1.1)' },
+                '6%': { transform: 'rotate(-8deg) scale(1.1)' },
+                '8%': { transform: 'rotate(8deg) scale(1.1)' },
+                '10%': { transform: 'rotate(0) scale(1)' },
+              },
+             glowFlow: {
+  '0%, 100%': { boxShadow: '0 0 10px rgba(255,100,103,0.3)', filter: 'brightness(1)' },
+  '50%': { boxShadow: '0 0 30px rgba(255,100,103,0.6)', filter: 'brightness(1.1)' },
+},
+
+              ringVibrate: {
+                '0%, 70%, 100%': { transform: 'rotate(0deg) scale(1)' },
+                '72%, 76%, 80%, 84%, 88%': { transform: 'rotate(-12deg) scale(1.05)' },
+                '74%, 78%, 82%, 86%, 90%': { transform: 'rotate(12deg) scale(1.05)' },
+                '92%': { transform: 'rotate(0deg) scale(1.1)' }
+              },
+              sidePeek: {
+                '0%, 100%': { transform: 'translateX(60%)' },
+                '40%, 60%': { transform: 'translateX(0%)' }
+              },
+              shimmerX: {
+                '0%': { transform: 'translateX(-100%)' },
+                '100%': { transform: 'translateX(100%)' }
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="manifest" href="/manifest.json">
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.10.0"
+  }
+}
+</script>
+
+<style>
+  /* Prevent mobile zoom on inputs */
+  input,
+  textarea,
+  select {
+    font-size: 16px;  /* minimum required to stop zoom */
+    line-height: 1.5; /* optional for readability */
+  }
+
+  /* Optional: remove blue focus outline */
+  input:focus,
+  textarea:focus {
+    outline: none;
+  }
+</style>
+
+
+
+<style>
+  body {
+    background-color: #F8FAFC;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Ensure main content doesn't get hidden by the tab bar */
+  main {
+    padding-bottom: 5rem;
+  }
+  @media (min-width: 768px) {
+    main {
+      padding-bottom: 0;
+    }
+  }
+</style>
+  <link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

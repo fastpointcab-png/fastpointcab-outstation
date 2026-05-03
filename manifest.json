@@ -1,0 +1,36 @@
+{
+  "name": "FastPointCab",
+  "short_name": "FastPointCab",
+  "description": "Taxi Coimbatore. Airport transfers, outstation, and city Cabs.",
+  "lang": "en-US",
+  "start_url": "/",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FF6467",
+  "theme_color": "#FF6467",
+  "icons": [
+    {
+      "src": "/images/taxi-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/taxi-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["travel", "transportation", "business"],
+  "screenshots": [
+    {
+      "src": "/images/1080x1920.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Book Taxi in Coimbatore"
+    }
+  ]
+}
