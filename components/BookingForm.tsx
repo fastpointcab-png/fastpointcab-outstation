@@ -966,7 +966,7 @@ if (dropRef.current && !dropAutocomplete.current) {
   const hillStr = formData.isHillStation ? '%0A*Hill Station Charge:* Applied (₹300)' : '';
 
   const message = `*NEW BOOKING CONFIRMATION*%0A*Trip Type:* ${formData.tripType}%0A*Phone:* ${formData.phone}%0A*Pickup:* ${formData.pickup}%0A${tripDetails}%0A${dateTimeStr}${hillStr}%0A*Vehicle:* ${formData.vehicleType}%0A*Fare:* ${formData.estimatedFare}`;
-  window.open(`https://wa.me/918870088020?text=${message}`, '_blank');
+  window.open(`https://wa.me/919488834020?text=${message}`, '_blank');
 };
 
 if (submitted) {
