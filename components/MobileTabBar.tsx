@@ -19,7 +19,7 @@ export const MobileTabBar: React.FC = () => {
       action: () => navigate('/', { state: { scrollToBook: true } }) 
     },
     { 
-      path: 'tel:+914223596446', 
+      path: 'tel:+918870088020', 
       label: 'Call', 
       icon: Phone, 
       isExternal: true,
@@ -36,7 +36,7 @@ export const MobileTabBar: React.FC = () => {
           const active = isActive(item.path) && !item.isAction && !item.isExternal;
 
           // Primary CTA Style (Book)
-          if (item.isPrimary) {
+               if (item.isPrimary) {
             return (
               <button
     key={item.label}
@@ -50,7 +50,6 @@ export const MobileTabBar: React.FC = () => {
   </button>
             );
           }
-
           // Urgent Action Style (Call)
           if (item.isHotline) {
             return (
