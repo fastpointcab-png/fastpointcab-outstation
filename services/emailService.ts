@@ -22,22 +22,35 @@ export const sendBookingEmail = async (details: BookingDetails): Promise<boolean
   });
 
   // Telegram message (clean & spaced)
-  const tgMessage = encodeURIComponent(
+const tgMessage = encodeURIComponent(
 `🚖 *New Booking Request*
 
-*Customer:* ${details.name}
-*Phone:* ${details.phone}
+📱 *Phone:* ${details.phone}
 
-*Pickup:* [${details.pickup}](https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(details.pickup)})
-*Drop:* [${details.drop}](https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(details.drop)})
+📍 *Pickup:* [${details.pickup}](https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(details.pickup)})
+📍 *Drop:* [${details.drop}](https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(details.drop)})
 
-*Vehicle:* ${details.vehicleType}
-*Fare:* ${details.estimatedFare || 'Manual Quote'}
-*Distance:* ${details.distance || 'N/A'}
+🚗 *Vehicle:* ${details.vehicleType}
+
+🔁 *Trip Type:* ${details.tripType}
+${details.tripType === "Local" ? ` *Package:* ${details.localPackage || "N/A"}` : ""}
+
+*Date:* ${details.date || "N/A"}
+*Time:* ${details.time || "N/A"}
+
+*Days:* ${details.numberOfDays || "1"}
+*Waiting Hours:* ${details.waitingHours || "0"}
+
+*Hill Station:* ${details.isHillStation ? "Yes (Extra Charge)" : "No"}
+
+*Distance:* ${details.distance || "N/A"}
+*Fare:* ${details.estimatedFare || "Manual Quote"}
+
 *Schedule (IST):* ${scheduleIST}
 
-Please contact the customer if needed.`
-  );
+Please contact the customer if needed.
+`
+);
   const tgLink = `https://t.me/share/url?url=&text=${tgMessage}`;
 
   // WhatsApp message
@@ -70,75 +83,147 @@ we are just one tap away`
 const waLink = `https://wa.me/${phoneWithCountryCode}?text=${waMessage}`;
 
 
-  const emailContent = {
-    sender: { name: "FastPointCab Booking", email: "fastpointcab@gmail.com" },
-    to: [{ email: "fastpointcab@gmail.com", name: "FastPointCab Admin" }],
-    subject: `Booking Request: ${details.pickup} [ Fare: ${details.estimatedFare || 'N/A'} ]`,
-    htmlContent: `
-      <div style="font-family: sans-serif; color: #1e293b; max-width: 600px; margin: 0 auto; border: 1px solid #f1f5f9; border-radius: 12px; overflow: hidden;">
-        <div style="background-color: #FDB813; padding: 30px; text-align: center;">
-          <h1 style="margin: 0; font-size: 24px; color: #0f172a;">New Web Booking</h1>
-        </div>
+ const emailContent = {
+  sender: { name: "FastPointCab Booking", email: "fastpointcab@gmail.com" },
+  to: [{ email: "fastpointcab@gmail.com", name: "FastPointCab Admin" }],
 
-        <div style="padding: 30px;">
-          <!-- Estimated Quote Box -->
-          <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 25px; text-align: center;">
-            <p style="margin: 0 0 10px 0; font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Estimated Quote</p>
-            <h2 style="margin: 0; font-size: 32px; color: #0f172a;">${details.estimatedFare || 'Calculated on call'}</h2>
-            <p style="margin: 5px 0 0 0; font-size: 14px; color: #0f172a;">Total distance: <strong>${details.distance || 'Unknown'}</strong></p>
-          </div>
+  subject: `Booking Request: ${details.pickup} [ Fare: ${details.estimatedFare || 'N/A'} ]`,
 
-          <table style="width: 100%; border-collapse: collapse;">
-            <tr>
-              <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Customer</td>
-              <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-weight: bold;">${details.name}</td>
-            </tr>
-            <tr>
-              <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Phone</td>
-              <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-weight: bold;"><a href="tel:${details.phone}">${details.phone}</a></td>
-            </tr>
-            <tr>
-              <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Pickup</td>
-              <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-weight: bold;">
-                <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(details.pickup)}" target="_blank" style="color:#0f172a; text-decoration:underline;">
-                  ${details.pickup}
-                </a>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Drop</td>
-              <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-weight: bold;">
-                <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(details.drop)}" target="_blank" style="color:#0f172a; text-decoration:underline;">
-                  ${details.drop}
-                </a>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Vehicle Type</td>
-              <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-weight: bold;">${details.vehicleType}</td>
-            </tr>
-            <tr>
-              <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Schedule (IST)</td>
-              <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-weight: bold;">
-                ${scheduleIST}
-              </td>
-            </tr>
-          </table>
+  htmlContent: `
+  <div style="font-family: sans-serif; color: #1e293b; max-width: 600px; margin: 0 auto; border: 1px solid #f1f5f9; border-radius: 12px; overflow: hidden;">
 
-          <!-- Action Buttons -->
-          <div style="margin-top: 30px; text-align: center; display: flex; justify-content: center; gap: 10px;">
-            <a href="${waLink}" target="_blank" style="background-color: #25D366; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold;">Reply on WhatsApp</a>
-            <a href="${tgLink}" target="_blank" style="background-color: #0088cc; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold;">Reply on Telegram</a>
-          </div>
-        </div>
+    <div style="padding: 30px;">
 
-        <div style="background-color: #f1f5f9; padding: 15px; text-align: center; font-size: 12px; color: #94a3b8;">
-          Sent from Trustyyellowcabs Booking System
-        </div>
+      <!-- Quote Box -->
+      <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 25px; text-align: center;">
+        <p style="margin: 0 0 10px 0; font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">
+          Estimated Quote
+        </p>
+
+        <h2 style="margin: 0; font-size: 32px; color: #0f172a;">
+          ${details.estimatedFare || "Calculated on call"}
+        </h2>
+
+        <p style="margin: 5px 0 0 0; font-size: 14px; color: #0f172a;">
+          Total distance: <strong>${details.distance || "Unknown"}</strong>
+        </p>
       </div>
-    `
-  };
 
+      <table style="width: 100%; border-collapse: collapse;">
+
+        <!-- Customer -->
+        <tr>
+          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Customer</td>
+          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-weight: bold;">
+            Web Booking
+          </td>
+        </tr>
+
+        <!-- Phone -->
+        <tr>
+          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Phone</td>
+          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-weight: bold;">
+            <a href="tel:${details.phone}">${details.phone}</a>
+          </td>
+        </tr>
+
+        <!-- Pickup -->
+        <tr>
+          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Pickup</td>
+          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-weight: bold;">
+            <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(details.pickup)}" target="_blank">
+              ${details.pickup}
+            </a>
+          </td>
+        </tr>
+
+        <!-- Drop -->
+        <tr>
+          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Drop</td>
+          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-weight: bold;">
+            <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(details.drop)}" target="_blank">
+              ${details.drop}
+            </a>
+          </td>
+        </tr>
+
+        <!-- Vehicle -->
+        <tr>
+          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Vehicle Type</td>
+          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-weight: bold;">
+            ${details.vehicleType}
+          </td>
+        </tr>
+
+        <!-- Trip Type -->
+        <tr>
+          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Trip Type</td>
+          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-weight: bold;">
+            ${details.tripType}
+            ${
+              details.tripType === "Local"
+                ? ` (Package: ${details.localPackage || "N/A"})`
+                : ""
+            }
+          </td>
+        </tr>
+
+        <!-- Days -->
+        <tr>
+          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Days</td>
+          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-weight: bold;">
+            ${details.numberOfDays || "1"}
+          </td>
+        </tr>
+
+        <!-- Waiting Hours -->
+        <tr>
+          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Waiting Hours</td>
+          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-weight: bold;">
+            ${details.waitingHours || "0"}
+          </td>
+        </tr>
+
+        <!-- Hill Station -->
+        <tr>
+          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Hill Station</td>
+          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-weight: bold;">
+            ${details.isHillStation ? "Yes (Extra Charge Applied)" : "No"}
+          </td>
+        </tr>
+
+        <!-- Schedule -->
+        <tr>
+          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Schedule (IST)</td>
+          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-weight: bold;">
+            ${scheduleIST}
+          </td>
+        </tr>
+
+      </table>
+
+      <!-- Buttons -->
+      <div style="margin-top: 30px; text-align: center; display: flex; justify-content: center; gap: 10px;">
+        <a href="${waLink}" target="_blank"
+          style="background-color: #25D366; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+          WhatsApp Reply
+        </a>
+
+        <a href="${tgLink}" target="_blank"
+          style="background-color: #0088cc; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+          Telegram Reply
+        </a>
+      </div>
+
+    </div>
+
+    <div style="background-color: #f1f5f9; padding: 15px; text-align: center; font-size: 12px; color: #94a3b8;">
+      Sent from FastPointCab Booking System
+    </div>
+
+  </div>
+`
+};
   try {
     const response = await fetch(url, {
       method: 'POST',
