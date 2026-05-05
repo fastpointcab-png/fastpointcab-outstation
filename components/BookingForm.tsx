@@ -501,6 +501,9 @@ const LocationSearchOverlay = ({ type, onSelect, onClose, googleLoaded, initialV
 
 export const BookingForm: React.FC = () => {
   const [step, setStep] = useState(1);
+  const stepRef = useRef(1);
+  useEffect(() => { stepRef.current = step; }, [step]);
+
   const pickupRef = useRef<HTMLInputElement>(null);
   const dropRef = useRef<HTMLInputElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
@@ -915,22 +918,33 @@ if (dropRef.current && !dropAutocomplete.current) {
   // Abandoned Lead Capture Logic
   const leadSentRef = useRef(false);
   const submittedRef = useRef(false);
-  
+
   const handleAbandonment = useCallback(async () => {
-    const data = formDataRef.current;
+    const currentFormData = formDataRef.current;
+    const currentSubmitted = submittedRef.current;
+    const currentStep = stepRef.current;
+
     // Only send if we have basic info, not submitted, not currently submitting, and haven't sent yet
-    if (!submittedRef.current && !isSubmittingRef.current && !leadSentRef.current && data.phone && data.phone.length === 10 && data.pickup && (data.tripType === TripType.LOCAL || data.drop)) {
-      
+    if (
+      !currentSubmitted && 
+      !isSubmittingRef.current && 
+      !leadSentRef.current && 
+      currentFormData.phone && 
+      currentFormData.phone.length === 10 && 
+      (currentFormData.pickup || currentFormData.drop)
+    ) {
       const bookingData = {
-        ...data,
+        ...currentFormData,
         isLead: true,
-        estimatedFare: data.estimatedFare || (step === 2 ? 'Abandoned at Step 2' : 'Abandoned Lead (Step 1)')
+        estimatedFare: currentFormData.estimatedFare || (currentStep >= 2 ? 'Abandoned at Vehicle/Summary Select' : 'Abandoned Lead (Step 1)')
       };
       
       // ⚠️ Mark as sent synchronously BEFORE async calls to prevent duplicate triggers
       leadSentRef.current = true;
       
-      console.log('Sending abandonment lead...');
+      console.log('Capturing abandoned lead...', bookingData.phone);
+      
+      // Send Email
       sendBookingEmail(bookingData);
       
       // Save to Google Sheets
@@ -940,7 +954,7 @@ if (dropRef.current && !dropAutocomplete.current) {
         console.error('Abandonment sheet sync error:', err);
       }
     }
-  }, [step]);
+  }, []);
 
   useEffect(() => {
     const onVisibilityChange = () => {
@@ -955,11 +969,10 @@ if (dropRef.current && !dropAutocomplete.current) {
     document.addEventListener('visibilitychange', onVisibilityChange);
 
     return () => {
-      // Trigger abandonment when user leaves the page or component unmounts (SPS route change)
-      handleAbandonment();
       window.removeEventListener('pagehide', handleAbandonment);
       window.removeEventListener('beforeunload', handleAbandonment);
       document.removeEventListener('visibilitychange', onVisibilityChange);
+      handleAbandonment();
     };
   }, [handleAbandonment]);
 
@@ -979,11 +992,11 @@ if (dropRef.current && !dropAutocomplete.current) {
 
     try {
       // Send Email
-      const success = await sendBookingEmail({ ...formData, isLead: false });
+      const success = await sendBookingEmail(formData);
       
       // Save to Google Sheets
       try {
-        await appendBookingToSheet({ ...formData, isLead: false });
+        await appendBookingToSheet(formData);
       } catch (err) {
         console.error('Sheet sync error:', err);
       }
@@ -1019,7 +1032,7 @@ if (dropRef.current && !dropAutocomplete.current) {
   const hillStr = formData.isHillStation ? '%0A*Hill Station Charge:* Applied (₹300)' : '';
 
   const message = `*NEW BOOKING CONFIRMATION*%0A*Trip Type:* ${formData.tripType}%0A*Phone:* ${formData.phone}%0A*Pickup:* ${formData.pickup}%0A${tripDetails}%0A${dateTimeStr}${hillStr}%0A*Vehicle:* ${formData.vehicleType}%0A*Fare:* ${formData.estimatedFare}`;
-  window.open(`https://wa.me/918870088020?text=${message}`, '_blank');
+  window.open(`https://wa.me/919488834020?text=${message}`, '_blank');
 };
 
 if (submitted) {
