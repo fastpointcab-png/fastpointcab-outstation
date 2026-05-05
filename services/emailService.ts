@@ -83,14 +83,31 @@ we are just one tap away`
 const waLink = `https://wa.me/${phoneWithCountryCode}?text=${waMessage}`;
 
 
- const emailContent = {
+  const isLead = details.isLead === true;
+  const subjectPrefix = isLead ? "⚠️ ABANDONED LEAD: " : "🚖 NEW BOOKING: ";
+
+  const emailContent = {
   sender: { name: "FastPointCab Booking", email: "fastpointcab@gmail.com" },
   to: [{ email: "fastpointcab@gmail.com", name: "FastPointCab Admin" }],
 
-  subject: `Booking Request: ${details.pickup} [ Fare: ${details.estimatedFare || 'N/A'} ]`,
+  subject: `${subjectPrefix}${details.phone} - ${details.pickup} [${details.estimatedFare || 'Quote'}]`,
 
   htmlContent: `
   <div style="font-family: sans-serif; color: #1e293b; max-width: 600px; margin: 0 auto; border: 1px solid #f1f5f9; border-radius: 12px; overflow: hidden;">
+
+    ${isLead ? `
+    <div style="background-color: #fef2f2; padding: 12px; text-align: center; border-bottom: 1px solid #fee2e2;">
+      <p style="margin: 0; color: #dc2626; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">
+        ⚠️ System Alert: Abandoned Process
+      </p>
+    </div>
+    ` : `
+    <div style="background-color: #f0fdf4; padding: 12px; text-align: center; border-bottom: 1px solid #dcfce7;">
+      <p style="margin: 0; color: #16a34a; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">
+        ✅ Confirmed Web Booking
+      </p>
+    </div>
+    `}
 
     <div style="padding: 30px;">
 

@@ -907,32 +907,42 @@ if (dropRef.current && !dropAutocomplete.current) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const formDataRef = useRef(formData);
+  useEffect(() => {
+    formDataRef.current = formData;
+  }, [formData]);
+
   // Abandoned Lead Capture Logic
   const leadSentRef = useRef(false);
-  useEffect(() => {
-    const handleAbandonment = async () => {
-      // Only send if we have basic info, not submitted, not currently submitting, and haven't sent yet
-      if (!submitted && !isSubmittingRef.current && !leadSentRef.current && formData.phone && formData.phone.length === 10 && formData.pickup && formData.drop) {
-        const isStep2 = step === 2;
-        const bookingData = {
-          ...formData,
-          estimatedFare: formData.estimatedFare || (isStep2 ? 'Abandoned at Step 2' : 'Abandoned Lead (Step 1)')
-        };
-        
-        // ⚠️ Mark as sent synchronously BEFORE async calls to prevent duplicate triggers
-        leadSentRef.current = true;
-        
-        sendBookingEmail(bookingData);
-        
-        // Save to Google Sheets
-        try {
-          await appendBookingToSheet(bookingData);
-        } catch (err) {
-          console.error('Abandonment sheet sync error:', err);
-        }
+  const submittedRef = useRef(false);
+  
+  const handleAbandonment = useCallback(async () => {
+    const data = formDataRef.current;
+    // Only send if we have basic info, not submitted, not currently submitting, and haven't sent yet
+    if (!submittedRef.current && !isSubmittingRef.current && !leadSentRef.current && data.phone && data.phone.length === 10 && data.pickup && (data.tripType === TripType.LOCAL || data.drop)) {
+      
+      const bookingData = {
+        ...data,
+        isLead: true,
+        estimatedFare: data.estimatedFare || (step === 2 ? 'Abandoned at Step 2' : 'Abandoned Lead (Step 1)')
+      };
+      
+      // ⚠️ Mark as sent synchronously BEFORE async calls to prevent duplicate triggers
+      leadSentRef.current = true;
+      
+      console.log('Sending abandonment lead...');
+      sendBookingEmail(bookingData);
+      
+      // Save to Google Sheets
+      try {
+        await appendBookingToSheet(bookingData);
+      } catch (err) {
+        console.error('Abandonment sheet sync error:', err);
       }
-    };
+    }
+  }, [step]);
 
+  useEffect(() => {
     const onVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         handleAbandonment();
@@ -945,11 +955,13 @@ if (dropRef.current && !dropAutocomplete.current) {
     document.addEventListener('visibilitychange', onVisibilityChange);
 
     return () => {
+      // Trigger abandonment when user leaves the page or component unmounts (SPS route change)
+      handleAbandonment();
       window.removeEventListener('pagehide', handleAbandonment);
       window.removeEventListener('beforeunload', handleAbandonment);
       document.removeEventListener('visibilitychange', onVisibilityChange);
     };
-  }, [formData, submitted, step]);
+  }, [handleAbandonment]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -967,16 +979,17 @@ if (dropRef.current && !dropAutocomplete.current) {
 
     try {
       // Send Email
-      const success = await sendBookingEmail(formData);
+      const success = await sendBookingEmail({ ...formData, isLead: false });
       
       // Save to Google Sheets
       try {
-        await appendBookingToSheet(formData);
+        await appendBookingToSheet({ ...formData, isLead: false });
       } catch (err) {
         console.error('Sheet sync error:', err);
       }
       
       if (success) {
+        submittedRef.current = true;
         setSubmitted(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
@@ -1006,7 +1019,7 @@ if (dropRef.current && !dropAutocomplete.current) {
   const hillStr = formData.isHillStation ? '%0A*Hill Station Charge:* Applied (₹300)' : '';
 
   const message = `*NEW BOOKING CONFIRMATION*%0A*Trip Type:* ${formData.tripType}%0A*Phone:* ${formData.phone}%0A*Pickup:* ${formData.pickup}%0A${tripDetails}%0A${dateTimeStr}${hillStr}%0A*Vehicle:* ${formData.vehicleType}%0A*Fare:* ${formData.estimatedFare}`;
-  window.open(`https://wa.me/919488834020?text=${message}`, '_blank');
+  window.open(`https://wa.me/918870088020?text=${message}`, '_blank');
 };
 
 if (submitted) {
@@ -1023,7 +1036,7 @@ if (submitted) {
         onClick={handleWhatsAppConfirm} 
         className="w-full bg-[#25D366] text-white font-black py-4.5 rounded-2xl flex items-center justify-center gap-3 shadow-lg text-[10px] uppercase tracking-widest active:scale-95 transition-all mb-3"
       >
-        <MessageCircle size={50} /> WhatsApp support
+        <MessageCircle size={20} /> WhatsApp support
       </button>
 
 {/* Book Another Ride Button */}
