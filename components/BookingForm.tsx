@@ -9,11 +9,11 @@ declare const google: any;
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 const PRICING: Record<VehicleType, number> = {
-  [VehicleType.MINI]: 15,
-  [VehicleType.SEDAN]: 16,
-  [VehicleType.SUV]: 20,
-  [VehicleType.SUV_PLUS]: 20,
-  [VehicleType.INNOVA]: 23,
+  [VehicleType.MINI]: 23,
+  [VehicleType.SEDAN]: 25,
+  [VehicleType.SUV]: 36,
+  [VehicleType.SUV_PLUS]: 37,
+  [VehicleType.INNOVA]: 39,
   [VehicleType.LUXURY]: 0,
   [VehicleType.TEMPO_TRAVELLER]: 0,
   [VehicleType.TOURIST_BUS]: 0,
@@ -253,21 +253,46 @@ const calculateFareDetails = (distance: number, vehicle: VehicleType, tripType: 
       result.breakdown.ratePerKm = rate;
       result.total = distanceFare + baseFare + hillCharge;
     }
-  } else if (tripType === TripType.ROUND_TRIP) {
-    const minDistance = days * 250;
-    const effectiveDistance = Math.max(distance * 2, minDistance);
-    const distanceFare = Math.round(effectiveDistance * perKmRate);
-    result.breakdown.distanceFare = distanceFare;
-    result.breakdown.billableDistance = effectiveDistance;
-    result.breakdown.ratePerKm = perKmRate;
-    
-    result.breakdown.extraDaysFare = 0;
+ } else if (tripType === TripType.ROUND_TRIP) {
 
-    let driverBetaPerDay = 0;
-    if (vehicle === VehicleType.MINI || vehicle === VehicleType.SEDAN) driverBetaPerDay = 400;
-    else if (vehicle === VehicleType.SUV || vehicle === VehicleType.SUV_PLUS || vehicle === VehicleType.INNOVA) driverBetaPerDay = 500;
-    
-    result.breakdown.driverBeta = days * driverBetaPerDay;
+  // Separate Round Trip Tariff
+  let roundTripRate = perKmRate;
+
+  if (vehicle === VehicleType.MINI) roundTripRate = 15;
+  else if (vehicle === VehicleType.SEDAN) roundTripRate = 16;
+  else if (vehicle === VehicleType.SUV) roundTripRate = 24;
+  else if (vehicle === VehicleType.SUV_PLUS) roundTripRate = 26;
+  else if (vehicle === VehicleType.INNOVA) roundTripRate = 27;
+
+  const minDistance = days * 10;
+  const effectiveDistance = Math.max(distance * 2, minDistance);
+
+  const distanceFare = Math.round(
+    effectiveDistance * roundTripRate
+  );
+
+  result.breakdown.distanceFare = distanceFare;
+  result.breakdown.billableDistance = effectiveDistance;
+  result.breakdown.ratePerKm = roundTripRate;
+
+  result.breakdown.extraDaysFare = 0;
+
+  let driverBetaPerDay = 0;
+
+  if (
+    vehicle === VehicleType.MINI ||
+    vehicle === VehicleType.SEDAN
+  ) {
+    driverBetaPerDay = 400;
+  } else if (
+    vehicle === VehicleType.SUV ||
+    vehicle === VehicleType.SUV_PLUS ||
+    vehicle === VehicleType.INNOVA
+  ) {
+    driverBetaPerDay = 500;
+  }
+
+  result.breakdown.driverBeta = days * driverBetaPerDay;
 
     // Waiting charge (Only for One Way if days=1, user requested to remove for round trip)
     result.breakdown.waitingCharge = 0;
@@ -1358,7 +1383,7 @@ if (submitted) {
           </div>
 
           <div className="relative group">
-            <div className="space-y-1.5 max-h-[240px] sm:max-h-[280px] overflow-y-auto pr-1 app-scroll">
+            <div className="space-y-1.5 max-h-[400px] sm:max-h-[280px] overflow-y-auto pr-1 app-scroll">
             {VEHICLE_CONFIG.map((v) => {
               return (
                 <button
@@ -1455,7 +1480,9 @@ if (submitted) {
           </div>
         </div>
 
+
         {/* Step 3: Summary */}
+        
         <div className={`${step === 3 ? 'space-y-4' : 'hidden'} animate-fade-in`}>
           <div className="flex justify-between items-center px-1">
             <button 
@@ -1615,7 +1642,7 @@ if (submitted) {
                     {formData.tripType === TripType.ROUND_TRIP && ((formData.rawDistance || 0) * 2) < (parseInt(formData.numberOfDays || '1') * 250) && (
                       <div className="pt-1">
                         <p className="text-[8px] text-[#FF6467] font-bold ">
-                          * Per day minimum 250 kms applicable
+                          
                         </p>
                       </div>
                     )}
