@@ -63,7 +63,7 @@ export const Home: React.FC = () => {
             <div className="flex flex-col space-y-10 text-center lg:text-left order-2 lg:order-1">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg w-fit mx-auto lg:mx-0 shadow-sm">
                 <span className="flex h-1.5 w-1.5 rounded-full bg-brand-yellow"></span>
-                <span className="text-slate-600 dark:text-slate-400 text-[10px] font-bold uppercase tracking-widest">Red Taxi-s Coimbatore</span>
+                <span className="text-slate-600 dark:text-slate-400 text-[10px] font-bold uppercase tracking-widest">Coimbatore Taxi</span>
               </div>
 
               <div className="space-y-6">
