@@ -1809,12 +1809,7 @@ if (submitted) {
         </span>
       </div>
 
-      {/* Note */}
-      <div className="rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 px-4 py-3">
-        <p className="text-xs text-amber-700 dark:text-amber-300 font-medium">
-          Toll, Interstate Tax and Parking charges are extra.
-        </p>
-      </div>
+      
 
     </div>
   </div>
