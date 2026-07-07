@@ -12,9 +12,10 @@ export enum VehicleType {
 }
 
 export enum TripType {
+  LOCAL = 'Local',
   ONE_WAY = 'One Way',
   ROUND_TRIP = 'Round Trip',
-  LOCAL = 'Local'
+  RENTAL = 'Rental'
 }
 
 export interface Vehicle {
