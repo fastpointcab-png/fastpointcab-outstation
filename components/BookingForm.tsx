@@ -11,16 +11,56 @@ const TripTypeRental = (TripType as any).RENTAL || 'Rental' as TripType;
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-const PRICING: Record<VehicleType, number> = {
-  [VehicleType.MINI]: 20,
-  [VehicleType.SEDAN]: 22,
-  [VehicleType.SUV]: 32,
-  [VehicleType.SUV_PLUS]: 33,
-  [VehicleType.INNOVA]: 40,
+const ONE_WAY_PRICING: Record<VehicleType, number> = {
+  [VehicleType.MINI]: 23,
+  [VehicleType.SEDAN]: 25,
+  [VehicleType.SUV]: 30,
+  [VehicleType.SUV_PLUS]: 32,
+  [VehicleType.INNOVA]: 35,
   [VehicleType.LUXURY]: 0,
   [VehicleType.TEMPO_TRAVELLER]: 0,
   [VehicleType.TOURIST_BUS]: 0,
   [VehicleType.CUSTOM]: 0,
+};
+
+const ROUND_TRIP_PRICING: Record<VehicleType, number> = {
+  [VehicleType.MINI]: 15,
+  [VehicleType.SEDAN]: 16,
+  [VehicleType.SUV]: 20,
+  [VehicleType.SUV_PLUS]: 22,
+  [VehicleType.INNOVA]: 25,
+  [VehicleType.LUXURY]: 0,
+  [VehicleType.TEMPO_TRAVELLER]: 0,
+  [VehicleType.TOURIST_BUS]: 0,
+  [VehicleType.CUSTOM]: 0,
+};
+
+const LOCAL_PRICING: Record<VehicleType, number> = {
+  [VehicleType.MINI]: 23,
+  [VehicleType.SEDAN]: 25,
+  [VehicleType.SUV]: 40,
+  [VehicleType.SUV_PLUS]: 45,
+  [VehicleType.INNOVA]: 50,
+  [VehicleType.LUXURY]: 0,
+  [VehicleType.TEMPO_TRAVELLER]: 0,
+  [VehicleType.TOURIST_BUS]: 0,
+  [VehicleType.CUSTOM]: 0,
+};
+
+const ONE_WAY_SHORT_RATES: Record<string, number> = {
+  [VehicleType.MINI]: 23,
+  [VehicleType.SEDAN]: 25,
+  [VehicleType.SUV]: 40,
+  [VehicleType.SUV_PLUS]: 45,
+  [VehicleType.INNOVA]: 50,
+};
+
+const LOCAL_SHORT_RATES: Record<string, number> = {
+  [VehicleType.MINI]: 23,
+  [VehicleType.SEDAN]: 25,
+  [VehicleType.SUV]: 40,
+  [VehicleType.SUV_PLUS]: 45,
+  [VehicleType.INNOVA]: 50,
 };
 
 const HILL_STATIONS = [
@@ -170,7 +210,13 @@ const calculateFareDetails = (distance: number, vehicle: VehicleType, tripType: 
 
   if (NO_FARE_VEHICLES.includes(vehicle)) return result;
   
-  const perKmRate = PRICING[vehicle] || 0;
+  let pricingList = ONE_WAY_PRICING;
+  if (tripType === TripType.ROUND_TRIP) {
+    pricingList = ROUND_TRIP_PRICING;
+  } else if (tripType === TripType.LOCAL) {
+    pricingList = LOCAL_PRICING;
+  }
+  const perKmRate = pricingList[vehicle] || 0;
 
   let hillCharge = 0;
   result.breakdown.hillCharge = hillCharge;
@@ -219,13 +265,7 @@ const calculateFareDetails = (distance: number, vehicle: VehicleType, tripType: 
       result.breakdown.driverBeta = driverBeta;
       result.total = distanceFare + driverBeta + hillCharge;
     } else {
-      const shortRates: Record<string, number> = {
-        [VehicleType.MINI]: 23,
-        [VehicleType.SEDAN]: 25,
-        [VehicleType.SUV]: 40,
-        [VehicleType.SUV_PLUS]: 45,
-        [VehicleType.INNOVA]: 50,
-      };
+      const shortRates = tripType === TripType.LOCAL ? LOCAL_SHORT_RATES : ONE_WAY_SHORT_RATES;
       const rate = shortRates[vehicle] || perKmRate;
       let baseFare = 0;
       
@@ -305,17 +345,17 @@ const LOCAL_PACKAGES = [
 const VEHICLE_CONFIG = [
   { 
     type: VehicleType.MINI, 
-    label: 'MINI / ANY SEDAN', 
+    label: 'MINI', 
     image: '/images/car_etios.svg', 
     capacity: 4,
-    description: 'AFFORDABLE'
+    description: 'ANY SEDAN'
   },
   { 
     type: VehicleType.SEDAN, 
     label: 'Sedan', 
     image: '/images/sedan.webp', 
     capacity: 4,
-    description: 'PRIME SEDAN'
+    description: 'SEDAN'
   },
   { 
     type: VehicleType.SUV, 
@@ -329,7 +369,7 @@ const VEHICLE_CONFIG = [
     label: 'Innova', 
     image: '/images/car_innova.svg', 
     capacity: 7,
-    description: 'PREMIUM INNOVA'
+    description: 'INNOVA'
   },
   { 
     type: VehicleType.TEMPO_TRAVELLER, 
@@ -1474,103 +1514,58 @@ if (submitted) {
             </div>
           )}
 
-          {/* Premium Date Picker (Chips + Custom Expand) */}
-          <div className="space-y-2">
-            <span className="block text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Select Date</span>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setFormData(prev => ({ ...prev, date: indiaToday }));
-                }}
-                className={`flex-1 py-2.5 px-3 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all text-center border ${
-                  formData.date === indiaToday
-                    ? 'bg-[#FF6467] text-white border-transparent shadow-md shadow-[#FF6467]/10'
-                    : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-300 border-slate-200/60 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900'
-                }`}
-              >
-                Today
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (tomorrowStr) {
-                    setFormData(prev => ({ ...prev, date: tomorrowStr }));
-                  }
-                }}
-                className={`flex-1 py-2.5 px-3 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all text-center border ${
-                  formData.date === tomorrowStr
-                    ? 'bg-[#FF6467] text-white border-transparent shadow-md shadow-[#FF6467]/10'
-                    : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-300 border-slate-200/60 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900'
-                }`}
-              >
-                Tomorrow
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (formData.date === indiaToday || formData.date === tomorrowStr) {
-                    setFormData(prev => ({ ...prev, date: '' }));
-                  }
-                }}
-                className={`flex-1 py-2.5 px-3 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all text-center border flex items-center justify-center gap-1.5 ${
-                  formData.date !== indiaToday && formData.date !== tomorrowStr
-                    ? 'bg-[#FF6467] text-white border-transparent shadow-md shadow-[#FF6467]/10'
-                    : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-300 border-slate-200/60 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-900'
-                }`}
-              >
-                <Calendar size={12} />
-                {formData.date !== indiaToday && formData.date !== tomorrowStr && formData.date ? 'Custom' : 'Other'}
-              </button>
+          {/* Compact Date & Time / Duration Grid */}
+          <style>{`
+            input[type="date"]::-webkit-calendar-picker-indicator,
+            input[type="time"]::-webkit-calendar-picker-indicator {
+              background: transparent;
+              display: none !important;
+              -webkit-appearance: none;
+            }
+          `}</style>
+          <div className={`grid gap-1.5 sm:gap-2.5 ${formData.tripType === TripType.ROUND_TRIP ? 'grid-cols-3' : 'grid-cols-2'}`}>
+            {/* Date Picker */}
+            <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800 focus-within:border-[#FF6467] focus-within:ring-2 focus-within:ring-[#FF6467]/10 rounded-xl p-1.5 px-2.5 sm:p-2 sm:px-3 flex items-center gap-1 sm:gap-2 transition-all shadow-sm min-w-0">
+              <Calendar size={13} className="text-[#FF6467] flex-shrink-0 hidden xs:block" />
+              <div className="flex-1 min-w-0">
+                <span className="block text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-0.5 truncate">Date</span>
+                <input
+                  type="date"
+                  name="date"
+                  min={indiaToday}
+                  value={formData.date}
+                  onChange={handleChange}
+                  className="w-full bg-transparent border-none p-0 focus:ring-0 text-[11px] sm:text-xs font-bold outline-none dark:text-white cursor-pointer min-w-0"
+                />
+              </div>
             </div>
 
-            {/* Custom Date Picker Input (expanded only if custom/other is active) */}
-            {(formData.date !== indiaToday && formData.date !== tomorrowStr) && (
-              <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800 rounded-xl p-2 px-3 flex items-center gap-2 shadow-sm animate-in fade-in slide-in-from-top-1 duration-200">
-                <Calendar size={14} className="text-[#FF6467]" />
-                <div className="flex-1 min-w-0">
-                  <span className="block text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">Choose Date</span>
-                  <input
-                    type="date"
-                    name="date"
-                    min={indiaToday}
-                    value={formData.date}
-                    onChange={handleChange}
-                    className="w-full bg-transparent border-none p-0 focus:ring-0 text-xs font-bold outline-none dark:text-white cursor-pointer"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Date & Time / Duration Grid */}
-          <div className="grid grid-cols-2 gap-2.5">
             {/* Time Picker */}
-            <div className={`bg-slate-50 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800 focus-within:border-[#FF6467] focus-within:ring-2 focus-within:ring-[#FF6467]/10 rounded-xl p-2 px-3 flex items-center gap-2.5 transition-all shadow-sm ${formData.tripType === TripType.ROUND_TRIP ? '' : 'col-span-2'}`}>
-              <Clock size={14} className="text-[#FF6467] flex-shrink-0" />
+            <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800 focus-within:border-[#FF6467] focus-within:ring-2 focus-within:ring-[#FF6467]/10 rounded-xl p-1.5 px-2.5 sm:p-2 sm:px-3 flex items-center gap-1 sm:gap-2 transition-all shadow-sm min-w-0">
+              <Clock size={13} className="text-[#FF6467] flex-shrink-0 hidden xs:block" />
               <div className="flex-1 min-w-0">
-                <span className="block text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">Pickup Time</span>
+                <span className="block text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-0.5 truncate">Time</span>
                 <input
                   type="time"
                   name="time"
                   value={formData.time}
                   onChange={handleChange}
-                  className="w-full bg-transparent border-none p-0 focus:ring-0 text-xs font-bold outline-none dark:text-white cursor-pointer"
+                  className="w-full bg-transparent border-none p-0 focus:ring-0 text-[11px] sm:text-xs font-bold outline-none dark:text-white cursor-pointer min-w-0"
                 />
               </div>
             </div>
 
             {/* Duration (Round Trip only) */}
             {formData.tripType === TripType.ROUND_TRIP && (
-              <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800 focus-within:border-[#FF6467] focus-within:ring-2 focus-within:ring-[#FF6467]/10 rounded-xl p-2 px-3 flex items-center gap-2.5 transition-all shadow-sm">
-                <Clock size={14} className="text-[#FF6467] flex-shrink-0" />
+              <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800 focus-within:border-[#FF6467] focus-within:ring-2 focus-within:ring-[#FF6467]/10 rounded-xl p-1.5 px-2.5 sm:p-2 sm:px-3 flex items-center gap-1 sm:gap-2 transition-all shadow-sm min-w-0">
+                <Clock size={13} className="text-[#FF6467] flex-shrink-0 hidden xs:block" />
                 <div className="flex-1 min-w-0">
-                  <span className="block text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">Duration</span>
+                  <span className="block text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-0.5 truncate">Duration</span>
                   <select
                     name="numberOfDays"
                     value={formData.numberOfDays}
                     onChange={handleChange}
-                    className="w-full bg-transparent border-none p-0 focus:ring-0 text-xs font-bold outline-none dark:text-white appearance-none cursor-pointer"
+                    className="w-full bg-transparent border-none p-0 focus:ring-0 text-[11px] sm:text-xs font-bold outline-none dark:text-white appearance-none cursor-pointer min-w-0"
                   >
                     {[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].map(n => (
                       <option key={n} value={n.toString()}>
@@ -1632,7 +1627,7 @@ if (submitted) {
                     }));
                   }}
                   className={`
-                    w-full flex items-center gap-3 p-6 rounded-2xl border-2 transition-all text-left
+                    w-full flex items-center gap-0 p-6 rounded-2xl border-2 transition-all text-left
                     ${formData.vehicleType === v.type 
                       ? 'border-[#FF6467] bg-[#FF6467]/5 dark:bg-[#FF6467]/10' 
                       : 'border-slate-50 dark:border-slate-800 bg-white dark:bg-slate-950'}
