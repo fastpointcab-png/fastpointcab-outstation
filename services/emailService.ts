@@ -84,7 +84,7 @@ const waLink = `https://wa.me/${phoneWithCountryCode}?text=${waMessage}`;
 
 
   const isLead = details.isLead === true;
-  const subjectPrefix = isLead ? "⚠️ ABANDONED LEAD: " : "🚖 NEW BOOKING: ";
+  const subjectPrefix = isLead ? "⚠️ ABANDONED LEAD: " : " NEW BOOKING: ";
 
   const emailContent = {
   sender: { name: "FastPointCab Booking", email: "fastpointcab@gmail.com" },
