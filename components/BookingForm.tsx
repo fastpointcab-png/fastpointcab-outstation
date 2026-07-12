@@ -1179,7 +1179,7 @@ if (submitted) {
         onClick={handleWhatsAppConfirm} 
         className="w-full bg-[#25D366] text-white font-black py-4.5 rounded-2xl flex items-center justify-center gap-3 shadow-lg text-[10px] uppercase tracking-widest active:scale-95 transition-all mb-3"
       >
-        <MessageCircle size={20} /> WhatsApp support
+        <MessageCircle size={50} /> WhatsApp support
       </button>
 
 {/* Book Another Ride Button */}
