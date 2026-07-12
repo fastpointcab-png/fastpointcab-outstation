@@ -459,13 +459,37 @@ const LocationSearchOverlay = ({ type, onSelect, onClose, googleLoaded, initialV
   useEffect(() => {
     if (query.length > 0 && service.current) {
       const COIMBATORE_CENTER = new (window as any).google.maps.LatLng(11.0168, 76.9558);
+      
+      // 1. Search with Coimbatore bias
       service.current.getPlacePredictions({ 
         input: query, 
         componentRestrictions: { country: 'in' },
         location: COIMBATORE_CENTER,
-        radius: 50000 
-      }, (results: any) => {
-        if (results) setPredictions(results);
+        radius: 45000 
+      }, (cbeResults: any) => {
+        // 2. Search without location bias
+        service.current.getPlacePredictions({
+          input: query,
+          componentRestrictions: { country: 'in' }
+        }, (allResults: any) => {
+          const map = new Map();
+
+          // Coimbatore results first
+          (cbeResults || []).forEach((item: any) => {
+            if (item && item.place_id) {
+              map.set(item.place_id, item);
+            }
+          });
+
+          // Then all other results
+          (allResults || []).forEach((item: any) => {
+            if (item && item.place_id && !map.has(item.place_id)) {
+              map.set(item.place_id, item);
+            }
+          });
+
+          setPredictions(Array.from(map.values()));
+        });
       });
     } else {
       setPredictions([]);
@@ -545,13 +569,13 @@ const LocationSearchOverlay = ({ type, onSelect, onClose, googleLoaded, initialV
               </div>
 
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold text-slate-900 dark:text-white leading-tight line-clamp-1 mb-0.5">
-                  {p.structured_formatting.main_text}
-                </p>
+                <div className="text-[14px] font-semibold text-[#FF6467] dark:text-[#FF6467] leading-5">
+                  {p.structured_formatting?.main_text || p.description}
+                </div>
 
-                <p className="text-[11px] text-slate-500 font-medium tracking-tight line-clamp-2 opacity-80 whitespace-normal">
-                  {p.structured_formatting.secondary_text}
-                </p>
+                <div className="text-[12px] text-slate-900 dark:text-white mt-1 leading-5 break-words font-medium">
+                  {p.structured_formatting?.secondary_text || p.description}
+                </div>
               </div>
             </button>
           ))
