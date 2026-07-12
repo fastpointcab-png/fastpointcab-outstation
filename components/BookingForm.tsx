@@ -564,7 +564,7 @@ const LocationSearchOverlay = ({ type, onSelect, onClose, googleLoaded, initialV
               onClick={() => onSelect(p.description)}
               className="w-full flex items-start gap-4 p-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-colors text-left group border-b border-slate-50 dark:border-slate-800 last:border-none"
             >
-              <div className="bg-slate-100 dark:bg-slate-800 p-2.5 rounded-xl text-slate-400 group-hover:bg-[#FF6467]/10 group-hover:text-[#FF6467] transition-all">
+              <div className="bg-slate-100 dark:bg-slate-800 p-2.5 rounded-xl text-slate-400 group-hover: transition-all">
                 <MapPin size={18} />
               </div>
 
