@@ -193,21 +193,7 @@ const waLink = `https://wa.me/${phoneWithCountryCode}?text=${waMessage}`;
           </td>
         </tr>
 
-        <!-- Waiting Hours -->
-        <tr>
-          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Waiting Hours</td>
-          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-weight: bold;">
-            ${details.waitingHours || "0"}
-          </td>
-        </tr>
-
-        <!-- Hill Station -->
-        <tr>
-          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; color: #64748b;">Hill Station</td>
-          <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-weight: bold;">
-            ${details.isHillStation ? "Yes (Extra Charge Applied)" : "No"}
-          </td>
-        </tr>
+       
 
         <!-- Schedule -->
         <tr>
